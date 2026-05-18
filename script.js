@@ -1999,8 +1999,8 @@ function schedulePartnerBanner() {
     // Puis toutes les 3 à 5 minutes
     setInterval(() => {
       showPartnerBanner();
-    }, 180000 + Math.random() * 120000); // Entre 3 et 5 minutes
-  }, 36000000);
+    }, 3600000 + Math.random() * 7200000); // Entre 3 et 5 minutes
+  }, 10800000);
 }
 // ===================== GESTION DE STOCK =====================
 // ===================== SYSTÈME DE NOTIFICATIONS PWA =====================
