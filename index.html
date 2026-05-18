@@ -2818,13 +2818,12 @@ function openLindarkPartner() {
 // Programme l'affichage de la bannière à intervalles aléatoires
 function schedulePartnerBanner() {
   // Première apparition après 45 secondes
-  setTimeout(() => {
+setTimeout(() => {
+  showPartnerBanner();
+  setInterval(() => {
     showPartnerBanner();
-    // Puis toutes les 3 à 5 minutes
-    setInterval(() => {
-      showPartnerBanner();
-    }, 180000 + Math.random() * 120000); // Entre 3 et 5 minutes
-  }, 45000);
+  }, 3600000 + Math.random() * 7200000);
+}, 10800000);
 }
 // ===================== GESTION DE STOCK =====================
 // ===================== SYSTÈME DE NOTIFICATIONS PWA =====================
