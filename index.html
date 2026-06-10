@@ -139,7 +139,7 @@
 
     <button class="nav-item" onclick="openCEOPin()" style="margin-bottom:8px;color:var(--amber);font-weight:700">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
-      👑 Mode CEO
+       Mode CEO
     </button>
 
     <div class="sidebar-bottom">
@@ -284,6 +284,13 @@
         <div class="panel-title">Nouvelle saisie</div>
         <div class="panel-sub">Enregistrez les données d'une journée de campagne</div>
       </div>
+      <!-- Barre essai gratuit — injectée ici par JS -->
+      <!-- la barre d'essai est insérée directement ici -->
+<div id="trialProgressBar" style="display:none;align-items:center;gap:10px;margin:0 0 16px 0;">
+  <span class="trial-label">✨ Essai gratuit</span>
+  <div class="trial-track"><div class="trial-fill" id="trialFill" style="width:0%"></div></div>
+  <span class="trial-count" id="trialCount">0 / 3</span>
+</div>
       <div style="display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start">
         <div>
           <form id="entryForm" autocomplete="off">
@@ -476,7 +483,7 @@
       <div class="settings-label">Exporter toutes les données</div>
       <div class="settings-desc">Exportez vos campagnes, produits et mouvements de stock au format CSV</div>
     </div>
-    <button class="btn-export-csv" onclick="exportAllDataToCSV()">📤 Exporter CSV</button>
+    <button class="btn-export-csv" onclick="exportAllDataToCSV()"> Exporter CSV</button>
   </div>
   <div class="settings-row" style="border-bottom:none">
     <div>
@@ -484,7 +491,7 @@
       <div class="settings-desc">Importez un fichier CSV (même format que l'export)</div>
     </div>
     <input type="file" id="csvImportFile" accept=".csv" style="display:none" onchange="importCSVData(this)">
-    <button class="btn-import-csv" onclick="document.getElementById('csvImportFile').click()">📥 Importer CSV</button>
+    <button class="btn-import-csv" onclick="document.getElementById('csvImportFile').click()">Importer CSV</button>
   </div>
 </div>
         <div class="card card-p"><div class="card-title" style="margin-bottom:4px;color:var(--red)">Zone de danger</div>
@@ -508,7 +515,9 @@
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
         Filtrer les données
       </div>
-      <button class="nk-filter-modal-close" onclick="closeFilterModal()">✕</button>
+      <button class="modern-close" onclick="closeFilterModal()">
+  <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</button>
     </div>
     <div class="nk-filter-modal-body">
       <!-- Périodes rapides -->
@@ -569,7 +578,9 @@
 <!-- ===================== EXPORT MODAL ===================== -->
 <div id="exportModalOverlay" class="export-modal-overlay">
   <div class="export-modal" style="position:relative">
-    <button class="export-close" onclick="closeExportModal()">✕</button>
+    <button class="modern-close" onclick="closeExportModal()">
+  <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</button>
     <div class="export-modal-title">📄 Exporter le rapport</div>
     <div class="export-modal-sub">Choisissez la période à inclure dans le rapport PDF</div>
     
@@ -657,20 +668,19 @@
     <div class="ceo-section">
       <div class="ceo-section-title"> Charges Fixes Mensuelles</div>
       <div class="ceo-charge-list" id="ceoChargeList"></div>
-      <div class="ceo-charge-add">
-        <input type="text" id="ceoChargeLabel" placeholder="Libellé (ex: Loyer)">
-        <input type="number" id="ceoChargeAmount" placeholder="Montant" min="0" style="max-width:140px">
-        <button onclick="ceoAddCharge()">+ Ajouter</button>
-      </div>
+<div class="ceo-charge-add">
+  <input type="text" id="ceoChargeLabel" placeholder="Libellé (ex: Loyer)">
+  <input type="number" id="ceoChargeAmount" placeholder="Montant" min="0">
+  <button onclick="ceoAddCharge()">+ Ajouter</button>
+</div>
       <div class="ceo-total-fixes"><span> Total Charges Fixes</span><span id="ceo_total_fixes" style="font-family:var(--font-m);font-size:18px">—</span></div>
     </div>
 
     <!-- MODIFIER LE PIN -->
     <div class="ceo-section">
-      <div class="ceo-section-title">🔒 Sécurité</div>
+      <div class="ceo-section-title">Sécurité</div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input type="password" id="ceoNewPin" placeholder="Nouveau PIN (4 chiffres)" maxlength="4" style="background:var(--surf-2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;font-size:13px;color:var(--ink);outline:none;width:180px;font-family:var(--font-m)">
-        <button class="ceo-pin-change-btn" onclick="ceoChangePin()"> Changer le PIN</button>
+        <button class="ceo-pin-change-btn" onclick="ceoChangePin()">🔑 Changer le PIN</button>
       </div>
     </div>
   </div>
@@ -699,8 +709,10 @@
 <div class="stock-overlay" id="stockOverlay">
   <div class="stock-panel">
     <div class="stock-header">
-      <div class="stock-header-title">📦 Gestion de Stock</div>
-      <button class="stock-close-btn" onclick="closeStock()">✕</button>
+      <div class="stock-header-title">Gestion de Stock</div>
+      <button class="modern-close" onclick="closeStock()">
+  <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</button>
     </div>
     <div class="stock-content">
       
@@ -800,7 +812,7 @@
       <!-- Performance des Produits -->
       <div class="stock-section">
         <div class="stock-section-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>📊 Performance des Produits</span>
+          <span>Performance des Produits</span>
           <button class="stock-btn stock-btn-outline" onclick="updateStockPerformance()" style="padding:6px 14px;font-size:11px">🔄 Actualiser</button>
         </div>
         <div id="stockPerformanceContent">
@@ -845,6 +857,37 @@
   <button class="partner-close" onclick="event.stopPropagation(); closePartnerBanner()">✕</button>
 </div>
 <!-- ===================== ACTIVATION SCREEN ===================== -->
+<!-- Barre progression essai gratuit (dans panel saisie) -->
+<div id="trialProgressBar" style="display:none">
+  <span class="trial-label">✨ Essai gratuit</span>
+  <div class="trial-track"><div class="trial-fill" id="trialFill" style="width:0%"></div></div>
+  <span class="trial-count" id="trialCount">0 / 3</span>
+</div>
+
+<!-- Bouton Activer flottant discret -->
+<button id="floatingActivateBtn" onclick="showTrialActivationOverlay(false)">
+  🔑 Activer la licence
+</button>
+
+<!-- Modale d'activation après limite essai -->
+<div id="trialActivationOverlay">
+  <div class="trial-modal">
+    <button class="trial-modal-close" onclick="closeTrialActivationOverlay()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;opacity:0.6;">✕</button>
+    <div class="trial-modal-badge">Essai gratuit terminé ?</div>
+    <div class="trial-modal-icon">🔐</div>
+    <div class="trial-modal-title" id="trialModalTitle">Activez votre licence</div>
+    <div class="trial-modal-msg" id="trialModalMsg">Contactez Lindark pour obtenir votre clé d'activation</div>
+    <div class="trial-modal-device" id="trialModalDeviceId">—</div>
+    <button class="trial-modal-btn trial-modal-btn-wa" id="trialWaBtn">
+      <svg width="17" height="17" viewBox="0 0 448 512"><path fill="currentColor" d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.7 17.7 68.9 27.1 106.2 27.1h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.1 0-65.6-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.4 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+      Contacter Lindark pour activer
+    </button>
+    <input type="text" class="trial-modal-input" id="trialKeyInput" placeholder="Saisir la clé d'activation" maxlength="30" autocomplete="off">
+    <div class="trial-modal-error" id="trialKeyError"></div>
+    <button class="trial-modal-btn trial-modal-btn-primary" id="trialValidateBtn">🔓 Déverrouiller</button>
+    <div class="trial-modal-footer">créé par Lindark Ecosystem</div>
+  </div>
+</div>
 <div id="activationScreen" style="display:none">
   <div class="act-icon">🔐</div>
   <div class="act-title">Activation Requise</div>
@@ -1059,6 +1102,8 @@ function activateApp(key) {
   const expectedKey = computeActivationKey(deviceId);
   if (key === expectedKey) {
     localStorage.setItem('noki_activated', 'true');
+    // Mettre à jour le hash d'intégrité IMMÉDIATEMENT pour éviter le reset au prochain refresh
+    localStorage.setItem('noki_integrity', generateIntegrityHash());
     return true;
   }
   return false;
@@ -1088,24 +1133,33 @@ function showActivationScreen() {
       const btn = document.getElementById('actValidateBtn');
       btn.textContent = '✅ Activé !';
       btn.style.background = 'linear-gradient(135deg,#0fa37f,#06d6a0)';
-      setTimeout(() => {
-        // Transition: activer → onboarding
+setTimeout(() => {
         const actScreen = document.getElementById('activationScreen');
         actScreen.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         actScreen.style.opacity = '0';
         actScreen.style.transform = 'scale(0.96)';
         setTimeout(() => {
           actScreen.style.display = 'none';
-          // Afficher l'onboarding avec animation
-          const ob = document.getElementById('onboarding');
-          ob.classList.remove('hidden');
-          ob.style.opacity = '0';
-          ob.style.transform = 'translateY(20px)';
-          ob.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-          setTimeout(() => {
-            ob.style.opacity = '1';
-            ob.style.transform = 'translateY(0)';
-          }, 30);
+          actScreen.style.opacity = '1';
+          actScreen.style.transform = 'none';
+          // Si onboarding déjà fait (entrées existantes) → aller directement sur l'app
+          const onboardingAlreadyDone = state.brand !== 'NokiMetrics' || state.entries.length > 0;
+          if (onboardingAlreadyDone) {
+            trialBlocked = false;
+            localStorage.removeItem('noki_trial_blocked');
+            updateTrialUI();
+            updateDashboard();
+            updateAnalytics();
+            showToast('🎉 Licence activée ! Bienvenue dans NokiMetrics');
+          } else {
+            // Première activation : afficher l'onboarding normalement
+            const ob = document.getElementById('onboarding');
+            ob.classList.remove('hidden');
+            ob.style.opacity = '0';
+            ob.style.transform = 'translateY(20px)';
+            ob.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            setTimeout(() => { ob.style.opacity = '1'; ob.style.transform = 'translateY(0)'; }, 30);
+          }
         }, 500);
       }, 900);
     } else {
@@ -1123,6 +1177,185 @@ function showActivationScreen() {
     }
   });
 }
+// ===================== TRIAL SYSTEM =====================
+const TRIAL_LIMIT = 3;
+let trialBlocked = false;
+
+function getTrialCount() {
+  let count = parseInt(localStorage.getItem('noki_trial_count') || '0', 10);
+  // S'assurer que le compteur ne dépasse pas la limite
+  if (count > TRIAL_LIMIT) {
+    localStorage.setItem('noki_trial_count', String(TRIAL_LIMIT));
+    return TRIAL_LIMIT;
+  }
+  return count;
+}
+
+function setTrialCount(n) {
+  localStorage.setItem('noki_trial_count', String(n));
+}
+
+function isTrialExhausted() {
+  if (isActivated()) return false;
+  return getTrialCount() >= TRIAL_LIMIT;
+}
+
+function updateTrialUI() {
+  if (isActivated()) {
+    const bar = document.getElementById('trialProgressBar');
+    if (bar) bar.style.display = 'none';
+    const fab = document.getElementById('floatingActivateBtn');
+    if (fab) fab.style.display = 'none';
+    return;
+  }
+
+  // Lire le nombre réel d'entrées depuis state (priorité) ou localStorage
+  const entryCount = (state && state.entries) ? state.entries.length : getTrialCount();
+  const usedCount = Math.min(entryCount, TRIAL_LIMIT);
+  const pct = Math.min(100, Math.round((usedCount / TRIAL_LIMIT) * 100));
+
+  // Persister dans localStorage pour lecture au prochain rechargement
+  localStorage.setItem('noki_trial_count', String(usedCount));
+
+  // Barre : elle est déjà placée dans #trialProgressInPanel dans le HTML,
+  // on la rend simplement visible (pas de déplacement DOM)
+  const bar = document.getElementById('trialProgressBar');
+  if (bar) {
+    bar.style.display = 'flex';
+    const fill = document.getElementById('trialFill');
+    const countSpan = document.getElementById('trialCount');
+    if (fill) fill.style.width = pct + '%';
+    if (countSpan) countSpan.textContent = usedCount + ' / ' + TRIAL_LIMIT;
+  }
+
+  // Bouton flottant
+  const fab = document.getElementById('floatingActivateBtn');
+  if (fab) fab.style.display = 'flex';
+}
+
+function showActivationScreenFromTrial() {
+  const deviceId = generateDeviceId();
+  
+  // Cacher l'app et afficher l'écran d'activation
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('onboarding').classList.add('hidden');
+  
+  const activationScreen = document.getElementById('activationScreen');
+  activationScreen.style.display = 'flex';
+  document.getElementById('actDeviceId').textContent = deviceId;
+  
+  // Configurer le bouton WhatsApp
+  document.getElementById('actWhatsappBtn').onclick = function() {
+    const message = encodeURIComponent('Bonjour Lindark, je souhaite activer Noki. Mon ID est : ' + deviceId);
+    window.open('https://wa.me/243838880629?text=' + message, '_blank');
+  };
+  
+  // Configurer la validation
+  const validateBtn = document.getElementById('actValidateBtn');
+  validateBtn.onclick = function() {
+    const key = document.getElementById('actKeyInput').value.trim();
+    if (!key) {
+      document.getElementById('actError').textContent = 'Saisissez une clé d\'activation';
+      return;
+    }
+    if (activateApp(key)) {
+      document.getElementById('actError').textContent = '';
+      validateBtn.textContent = '✅ Activé !';
+      validateBtn.style.background = 'linear-gradient(135deg,#0fa37f,#06d6a0)';
+      
+setTimeout(() => {
+        activationScreen.style.display = 'none';
+        trialBlocked = false;
+        localStorage.removeItem('noki_trial_blocked');
+        document.getElementById('app').classList.add('visible');
+        // Petit délai pour que localStorage soit bien à jour avant updateTrialUI
+        setTimeout(() => {
+          updateTrialUI();
+          updateDashboard();
+          updateAnalytics();
+        }, 50);
+        showToast('🎉 Licence activée ! Merci de faire confiance à NokiMetrics');
+      }, 500);
+    } else {
+      document.getElementById('actError').textContent = '❌ Clé invalide. Vérifiez et réessayez.';
+      const input = document.getElementById('actKeyInput');
+      input.style.borderColor = 'var(--red)';
+      input.style.animation = 'shake 0.4s ease';
+      setTimeout(() => { input.style.borderColor = ''; input.style.animation = ''; }, 1200);
+    }
+  };
+  
+  document.getElementById('actKeyInput').onkeydown = function(e) {
+    if (e.key === 'Enter') validateBtn.click();
+  };
+  
+  // Nettoyer le champ
+  document.getElementById('actKeyInput').value = '';
+  document.getElementById('actError').textContent = '';
+}
+
+function showTrialActivationOverlay(isLimit) {
+  const deviceId = generateDeviceId();
+  const overlay = document.getElementById('trialActivationOverlay');
+  
+  document.getElementById('trialKeyInput').value = '';
+  document.getElementById('trialKeyError').textContent = '';
+  document.getElementById('trialModalDeviceId').textContent = deviceId;
+
+  if (isLimit) {
+    document.getElementById('trialModalTitle').textContent = 'Essai gratuit terminé';
+    document.getElementById('trialModalMsg').innerHTML = 'Vous avez atteint la limite de votre essai gratuit (3 saisies).<br><strong>Activez votre licence pour continuer à suivre vos performances sans interruption.</strong>';
+  } else {
+    document.getElementById('trialModalTitle').textContent = 'Activez votre licence';
+    document.getElementById('trialModalMsg').innerHTML = 'Contactez Lindark pour obtenir votre clé d\'activation et déverrouiller toutes les fonctionnalités.';
+  }
+
+  document.getElementById('trialWaBtn').onclick = function() {
+    const message = encodeURIComponent('Bonjour Lindark, je souhaite activer Noki. Mon ID est : ' + deviceId);
+    window.open('https://wa.me/243838880629?text=' + message, '_blank');
+  };
+
+  const validateBtn = document.getElementById('trialValidateBtn');
+  validateBtn.onclick = function() {
+    const key = document.getElementById('trialKeyInput').value.trim();
+    if (!key) {
+      document.getElementById('trialKeyError').textContent = 'Saisissez une clé d\'activation';
+      return;
+    }
+    if (activateApp(key)) {
+      document.getElementById('trialKeyError').textContent = '';
+      validateBtn.textContent = '✅ Activé !';
+      validateBtn.style.background = 'linear-gradient(135deg,#0fa37f,#06d6a0)';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        updateTrialUI();
+        showToast('🎉 Licence activée !');
+        updateDashboard();
+        updateAnalytics();
+      }, 500);
+    } else {
+      document.getElementById('trialKeyError').textContent = '❌ Clé invalide.';
+      document.getElementById('trialKeyInput').style.borderColor = 'var(--red)';
+      setTimeout(() => { document.getElementById('trialKeyInput').style.borderColor = ''; }, 1200);
+    }
+  };
+
+  document.getElementById('trialKeyInput').onkeydown = function(e) {
+    if (e.key === 'Enter') validateBtn.click();
+  };
+
+  overlay.style.display = 'flex';
+}
+
+function closeTrialActivationOverlay() {
+  const overlay = document.getElementById('trialActivationOverlay');
+  if (overlay) overlay.style.display = 'none';
+  // Une fois la modale fermée, afficher l'écran d'activation
+  if (!isActivated() && state.entries.length >= TRIAL_LIMIT) {
+    showActivationScreenFromTrial();
+  }
+}
+
 let state = {
   entries: [],
   currency: 'FCFA',
@@ -1133,9 +1366,18 @@ let state = {
   filters: { campaign: '', dateFrom: '', dateTo: '' },
   secondaryCurrency: '',
   exchangeRate: 0,
-  theme: 'dark'
+  theme: 'dark',
+  ceoPIN: '0000'
 };
 let profitChart = null, costChart = null, deliveryChart = null;
+// Fonction utilitaire pour réinitialiser l'essai (uniquement pour debug)
+function resetTrialCount() {
+  if (!isActivated()) {
+    localStorage.removeItem('noki_trial_count');
+    updateTrialUI();
+    showToast('🔄 Compteur d\'essai réinitialisé');
+  }
+}
 
 function loadState() {
   try {
@@ -1143,16 +1385,14 @@ function loadState() {
     if (raw) state = { ...state, ...JSON.parse(raw) };
   } catch(e) {}
 }
-function saveState() {
+async function saveState() {
   if (!checkLocalStorage()) {
     showLocalStorageWarning();
     return;
   }
   try { 
     localStorage.setItem(SK, JSON.stringify(state));
-    // Mettre à jour le hash d'intégrité après chaque sauvegarde
     localStorage.setItem('noki_integrity', generateIntegrityHash());
-    // Marquer les données comme synchronisées
     markDataStale();
     lastSyncTimestamp = new Date();
   } catch(e) {
@@ -1271,7 +1511,6 @@ function enterApp() {
   updateAnalytics();
   applyTheme();
       if (!state.ceoPIN) state.ceoPIN = '0000';
-      if (!state.stockPIN) state.stockPIN = '1234';
   // Démarrer la bannière partenaire
   schedulePartnerBanner();
 }
@@ -1569,7 +1808,7 @@ function updateCEODashboard() {
   const insight = document.getElementById('ceoInsight');
   if (totalFixes === 0) {
     insight.className = 'ceo-insight-box warning';
-    insight.textContent = '⚠️ Aucune charge fixe enregistrée. Ajoutez vos dépenses mensuelles.';
+    insight.textContent = ' Aucune charge fixe enregistrée. Ajoutez vos dépenses mensuelles.';
   } else if (profitReel < 0) {
     insight.className = 'ceo-insight-box critical';
     insight.textContent = `🔴 Statut Critique : Il vous manque ${fmtNum(Math.max(0, breakEvenUnits - agg.del))} ventes pour couvrir vos frais fixes (${fmt(totalFixes)}).`;
@@ -1611,13 +1850,314 @@ function ceoDeleteCharge(index) {
   showToast('Charge supprimée');
 }
 
+// ===================== MODALE CHANGEMENT PIN REFONTE =====================
+let pinChangeStep = 1;
+let oldPinEntered = '';
+let newPinEntered = '';
+let confirmPinEntered = '';
+
+function openPinChangeModal() {
+  pinChangeStep = 1;
+  oldPinEntered = '';
+  newPinEntered = '';
+  confirmPinEntered = '';
+  
+  const existingModal = document.getElementById('ceoPinChangeOverlay');
+  if (existingModal) existingModal.remove();
+  
+  const modalHtml = `
+    <div id="ceoPinChangeOverlay" class="ceo-pin-change-overlay">
+      <div class="ceo-pin-change-modal">
+        <div class="ceo-pin-change-header">
+          <div class="ceo-pin-change-header-title">
+            <span>🔒</span> Changer le PIN
+          </div>
+          <button class="ceo-pin-change-header-close" onclick="closePinChangeModal()">✕</button>
+        </div>
+        <div class="ceo-pin-change-body" id="pinChangeBody"></div>
+        <div class="ceo-pin-change-footer">
+          <button class="ceo-pin-cancel-btn" onclick="closePinChangeModal()">Annuler</button>
+          <button class="ceo-pin-confirm-btn" id="pinChangeNextBtn">Suivant</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  
+  updatePinChangeStepUI();
+  
+  setTimeout(() => {
+    const overlay = document.getElementById('ceoPinChangeOverlay');
+    if (overlay) overlay.classList.add('open');
+  }, 10);
+}
+
+function closePinChangeModal() {
+  const overlay = document.getElementById('ceoPinChangeOverlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+    setTimeout(() => overlay.remove(), 300);
+  }
+}
+
+function updatePinChangeStepUI() {
+  const body = document.getElementById('pinChangeBody');
+  const nextBtn = document.getElementById('pinChangeNextBtn');
+  if (!body) return;
+  
+  let html = '';
+  
+  if (pinChangeStep === 1) {
+    html = `
+      <div class="ceo-pin-change-step">
+        <div class="ceo-pin-change-step-title">
+          <span class="ceo-pin-change-step-badge">Étape 1/3</span>
+          PIN actuel
+        </div>
+        <div class="ceo-pin-input-group" id="oldPinDigits">
+          ${Array(4).fill().map((_, i) => `<div class="ceo-pin-digit" data-pos="${i}">•</div>`).join('')}
+        </div>
+        <div class="ceo-pin-keyboard" id="oldPinKeyboard"></div>
+        <div id="oldPinError" class="ceo-pin-error hidden">
+          <span>⚠️</span> PIN incorrect
+        </div>
+      </div>
+    `;
+    nextBtn.textContent = 'Vérifier';
+    setTimeout(() => {
+      generatePinKeyboard('old');
+      updatePinDigits('oldPinDigits', oldPinEntered);
+    }, 50);
+  } else if (pinChangeStep === 2) {
+    html = `
+      <div class="ceo-pin-change-step">
+        <div class="ceo-pin-change-step-title">
+          <span class="ceo-pin-change-step-badge">Étape 2/3</span>
+          Nouveau PIN (4 chiffres)
+        </div>
+        <div class="ceo-pin-input-group" id="newPinDigits">
+          ${Array(4).fill().map((_, i) => `<div class="ceo-pin-digit" data-pos="${i}">•</div>`).join('')}
+        </div>
+        <div class="ceo-pin-keyboard" id="newPinKeyboard"></div>
+        <div id="newPinError" class="ceo-pin-error hidden">
+          <span>⚠️</span> Le PIN doit contenir 4 chiffres
+        </div>
+      </div>
+    `;
+    nextBtn.textContent = 'Confirmer';
+    setTimeout(() => {
+      generatePinKeyboard('new');
+      updatePinDigits('newPinDigits', newPinEntered);
+    }, 50);
+  } else if (pinChangeStep === 3) {
+    html = `
+      <div class="ceo-pin-change-step">
+        <div class="ceo-pin-change-step-title">
+          <span class="ceo-pin-change-step-badge">Étape 3/3</span>
+          Confirmer le nouveau PIN
+        </div>
+        <div class="ceo-pin-input-group" id="confirmPinDigits">
+          ${Array(4).fill().map((_, i) => `<div class="ceo-pin-digit" data-pos="${i}">•</div>`).join('')}
+        </div>
+        <div class="ceo-pin-keyboard" id="confirmPinKeyboard"></div>
+        <div id="confirmPinError" class="ceo-pin-error hidden">
+          <span>⚠️</span> Les PIN ne correspondent pas
+        </div>
+        <div id="pinSuccessMsg" class="ceo-pin-success hidden">
+          <span>✅</span> PIN modifié avec succès !
+        </div>
+      </div>
+    `;
+    nextBtn.textContent = 'Valider';
+    setTimeout(() => {
+      generatePinKeyboard('confirm');
+      updatePinDigits('confirmPinDigits', confirmPinEntered);
+    }, 50);
+  }
+  
+  body.innerHTML = html;
+  
+  if (nextBtn) {
+    nextBtn.onclick = handlePinChangeStep;
+  }
+}
+
+function generatePinKeyboard(target) {
+  const container = document.getElementById(`${target}PinKeyboard`);
+  if (!container) return;
+  
+  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✓'];
+  
+  container.innerHTML = keys.map(key => {
+    let extraClass = '';
+    let onClick = '';
+    
+    if (key === '⌫') {
+      extraClass = 'clear';
+      onClick = `removePinDigit('${target}')`;
+    } else if (key === '✓') {
+      extraClass = '';
+      onClick = `validateCurrentStep('${target}')`;
+    } else {
+      onClick = `addPinDigit('${target}', '${key}')`;
+    }
+    
+    return `<button class="ceo-pin-keyboard-btn ${extraClass}" onclick="${onClick}">${key}</button>`;
+  }).join('');
+}
+
+function addPinDigit(target, digit) {
+  if (target === 'old' && oldPinEntered.length < 4) {
+    oldPinEntered += digit;
+    updatePinDigits('oldPinDigits', oldPinEntered);
+    hidePinError('old');
+  } else if (target === 'new' && newPinEntered.length < 4) {
+    newPinEntered += digit;
+    updatePinDigits('newPinDigits', newPinEntered);
+    hidePinError('new');
+  } else if (target === 'confirm' && confirmPinEntered.length < 4) {
+    confirmPinEntered += digit;
+    updatePinDigits('confirmPinDigits', confirmPinEntered);
+    hidePinError('confirm');
+  }
+}
+
+function removePinDigit(target) {
+  if (target === 'old') {
+    oldPinEntered = oldPinEntered.slice(0, -1);
+    updatePinDigits('oldPinDigits', oldPinEntered);
+  } else if (target === 'new') {
+    newPinEntered = newPinEntered.slice(0, -1);
+    updatePinDigits('newPinDigits', newPinEntered);
+  } else if (target === 'confirm') {
+    confirmPinEntered = confirmPinEntered.slice(0, -1);
+    updatePinDigits('confirmPinDigits', confirmPinEntered);
+  }
+}
+
+function updatePinDigits(containerId, value) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  const digits = container.querySelectorAll('.ceo-pin-digit');
+  digits.forEach((digit, i) => {
+    if (value && value[i]) {
+      digit.textContent = value[i];
+      digit.classList.add('filled');
+    } else {
+      digit.textContent = '•';
+      digit.classList.remove('filled');
+    }
+  });
+}
+
+function hidePinError(step) {
+  let errorId = step === 'old' ? 'oldPinError' : (step === 'new' ? 'newPinError' : 'confirmPinError');
+  const errorEl = document.getElementById(errorId);
+  if (errorEl) errorEl.classList.add('hidden');
+}
+
+function showPinError(step) {
+  let errorId = step === 'old' ? 'oldPinError' : (step === 'new' ? 'newPinError' : 'confirmPinError');
+  const errorEl = document.getElementById(errorId);
+  if (errorEl) errorEl.classList.remove('hidden');
+}
+
+function validateCurrentStep(step) {
+  if (step === 'old') {
+    if (oldPinEntered.length !== 4) {
+      showPinError('old');
+      return;
+    }
+    
+    const expectedPin = state.ceoPIN || '0000';
+    if (oldPinEntered === expectedPin) {
+      pinChangeStep = 2;
+      updatePinChangeStepUI();
+    } else {
+      showPinError('old');
+      const digits = document.querySelectorAll('#oldPinDigits .ceo-pin-digit');
+      digits.forEach(d => {
+        d.style.animation = 'shake 0.4s ease';
+        setTimeout(() => { if(d) d.style.animation = ''; }, 400);
+      });
+    }
+  } else if (step === 'new') {
+    if (newPinEntered.length !== 4) {
+      showPinError('new');
+      return;
+    }
+    pinChangeStep = 3;
+    updatePinChangeStepUI();
+  } else if (step === 'confirm') {
+    if (confirmPinEntered.length !== 4) {
+      showPinError('confirm');
+      return;
+    }
+    
+    if (newPinEntered !== confirmPinEntered) {
+      showPinError('confirm');
+      const digits = document.querySelectorAll('#confirmPinDigits .ceo-pin-digit');
+      digits.forEach(d => {
+        d.style.animation = 'shake 0.4s ease';
+        setTimeout(() => { if(d) d.style.animation = ''; }, 400);
+      });
+      return;
+    }
+    
+    if (newPinEntered === oldPinEntered) {
+      const errorEl = document.getElementById('confirmPinError');
+      if (errorEl) {
+        errorEl.innerHTML = '<span>⚠️</span> Le nouveau PIN est identique à l\'ancien';
+        errorEl.classList.remove('hidden');
+      }
+      return;
+    }
+    
+    state.ceoPIN = newPinEntered;
+    saveState();
+    
+    const successMsg = document.getElementById('pinSuccessMsg');
+    if (successMsg) successMsg.classList.remove('hidden');
+    
+    const nextBtn = document.getElementById('pinChangeNextBtn');
+    if (nextBtn) {
+      nextBtn.disabled = true;
+      nextBtn.style.opacity = '0.6';
+    }
+    
+    setTimeout(() => {
+      closePinChangeModal();
+      showToast('✅ PIN changé avec succès !');
+      const securityBtn = document.querySelector('.ceo-pin-change-btn');
+      if (securityBtn) {
+        securityBtn.style.backgroundColor = 'var(--green)';
+        securityBtn.style.color = '#fff';
+        setTimeout(() => {
+          if(securityBtn) {
+            securityBtn.style.backgroundColor = '';
+            securityBtn.style.color = '';
+          }
+        }, 500);
+      }
+    }, 1500);
+  }
+}
+
+function handlePinChangeStep() {
+  if (pinChangeStep === 1) {
+    validateCurrentStep('old');
+  } else if (pinChangeStep === 2) {
+    validateCurrentStep('new');
+  } else if (pinChangeStep === 3) {
+    validateCurrentStep('confirm');
+  }
+}
+
+// NOUVELLE VERSION de ceoChangePin - REMPLACE l'ancienne
 function ceoChangePin() {
-  const newPin = document.getElementById('ceoNewPin').value.trim();
-  if (!/^\d{4}$/.test(newPin)) return showToast('Le PIN doit contenir exactement 4 chiffres');
-  state.ceoPIN = newPin;
-  saveState();
-  document.getElementById('ceoNewPin').value = '';
-  showToast('PIN modifié avec succès 🔒');
+  openPinChangeModal();
 }
 
 function toggleTheme() {
@@ -2241,49 +2781,101 @@ function liveUpdate() {
   if (el) el.addEventListener('change', liveUpdate); 
 });
 
-document.getElementById('entryForm').addEventListener('submit', e => {
+document.getElementById('entryForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const dateISO  = document.getElementById('f_date').value;
-  const campaign = document.getElementById('f_campaign').value.trim();
-  if (!dateISO || !campaign) return;
 
-  const entry = { id: Date.now(), dateISO, campaign, 
-    spend: +document.getElementById('f_spend').value || 0, 
+  // ========== 1. Références et validation de base ==========
+  const submitBtn = document.querySelector('#entryForm .submit-btn');
+  const dateISO = document.getElementById('f_date').value;
+  const campaign = document.getElementById('f_campaign').value.trim();
+
+  if (!dateISO || !campaign) {
+    animateSubmitButton(submitBtn, false);
+    showToast('❌ Veuillez remplir la date et la campagne');
+    return;
+  }
+
+  // ========== 2. Vérification du stock (AVANT toute sauvegarde) ==========
+  const stockSel = document.getElementById('f_stock_product');
+  let deliveredQty = 0;
+  let productId = null;
+
+  if (stockSel && stockSel.value) {
+    productId = +stockSel.value;
+    deliveredQty = +document.getElementById('f_delivered').value || 0;
+    if (deliveredQty > 0) {
+      const stockData = getStockData();
+      const product = stockData.products.find(p => p.id === productId);
+      if (product && product.qty < deliveredQty) {
+        showToast(`❌ Stock insuffisant pour "${product.name}" (disponible: ${product.qty}, demandé: ${deliveredQty})`);
+        animateSubmitButton(submitBtn, false);
+        return; // ← On arrête ici, rien n’est sauvegardé
+      }
+    }
+  }
+
+  // ========== 3. Garde-fou essai gratuit (si non activé) ==========
+  if (!isActivated()) {
+    const currentEntryCount = state.entries.length;
+    if (currentEntryCount >= TRIAL_LIMIT) {
+      animateSubmitButton(submitBtn, false);
+      showTrialActivationOverlay(true);
+      return;
+    }
+    // Mise à jour visuelle de la barre d’essai
+    const nextCount = Math.min(currentEntryCount + 1, TRIAL_LIMIT);
+    const nextPct = Math.round((nextCount / TRIAL_LIMIT) * 100);
+    const fill = document.getElementById('trialFill');
+    const countSpan = document.getElementById('trialCount');
+    const bar = document.getElementById('trialProgressBar');
+    if (bar) bar.style.display = 'flex';
+    if (fill) fill.style.width = nextPct + '%';
+    if (countSpan) countSpan.textContent = nextCount + ' / ' + TRIAL_LIMIT;
+  }
+
+  // ========== 4. Chargement visuel du bouton ==========
+  submitBtn.classList.add('loading');
+  submitBtn.disabled = true;
+  await new Promise(resolve => setTimeout(resolve, 400));
+
+  // ========== 5. Construction et sauvegarde de la campagne ==========
+  const entry = {
+    id: Date.now(),
+    dateISO,
+    campaign,
+    spend: +document.getElementById('f_spend').value || 0,
     spendCurrency: document.getElementById('f_spend_currency')?.value || 'main',
-    orders: +document.getElementById('f_orders').value || 0, 
-    delivered: +document.getElementById('f_delivered').value || 0, 
-    confirmed: +document.getElementById('f_orders').value || 0, 
-    buy: +document.getElementById('f_buy').value || 0, 
+    orders: +document.getElementById('f_orders').value || 0,
+    delivered: deliveredQty,
+    confirmed: +document.getElementById('f_orders').value || 0,
+    buy: +document.getElementById('f_buy').value || 0,
     buyCurrency: document.getElementById('f_buy_currency')?.value || 'main',
-    sell: +document.getElementById('f_sell').value || 0, 
+    sell: +document.getElementById('f_sell').value || 0,
     sellCurrency: document.getElementById('f_sell_currency')?.value || 'main',
-    ship: +document.getElementById('f_ship').value || 0, 
+    ship: +document.getElementById('f_ship').value || 0,
     shipCurrency: document.getElementById('f_ship_currency')?.value || 'main',
-    call: +document.getElementById('f_call').value || 0, 
+    call: +document.getElementById('f_call').value || 0,
     callCurrency: document.getElementById('f_call_currency')?.value || 'main',
-    returns: +document.getElementById('f_returns').value || 0, 
+    returns: +document.getElementById('f_returns').value || 0,
     other: +document.getElementById('f_other').value || 0,
     otherCurrency: document.getElementById('f_other_currency')?.value || 'main'
   };
 
   state.entries.push(entry);
-  saveState();
-  
-  // Mettre à jour le stock si un produit a été sélectionné
-  const stockSel = document.getElementById('f_stock_product');
+  await saveState();
+
+  // ========== 6. Mise à jour du stock (si produit sélectionné) ==========
   if (stockSel && stockSel.value) {
-    const deliveredQty = +document.getElementById('f_delivered').value || 0;
     const returnsQty = +document.getElementById('f_returns').value || 0;
-    const netOut = deliveredQty - returnsQty;
-    
     if (deliveredQty > 0) {
-      stockMove(+stockSel.value, 'out', deliveredQty, 'Vente via saisie campagne');
+      stockMove(productId, 'out', deliveredQty, 'Vente via saisie campagne');
     }
     if (returnsQty > 0) {
-      stockMove(+stockSel.value, 'in', returnsQty, 'Retour/RMA via saisie campagne');
+      stockMove(productId, 'in', returnsQty, 'Retour/RMA via saisie campagne');
     }
   }
-    
+
+  // ========== 7. Rafraîchissement final ==========
   updateDashboard();
   updateAnalytics();
   document.getElementById('entryForm').reset();
@@ -2291,8 +2883,10 @@ document.getElementById('entryForm').addEventListener('submit', e => {
   document.getElementById('f_stock_product').value = '';
   document.getElementById('livePreview').style.display = 'none';
   showPanel('dashboard');
-  showToast('Saisie enregistrée avec succès'); 
-  // Déclencher les vérifications après une nouvelle saisie
+
+  animateSubmitButton(submitBtn, true);
+  showToast('✅ Saisie enregistrée avec succès');
+
   setTimeout(() => {
     checkCPAAnomaly();
     checkStockAlerts();
@@ -2460,19 +3054,28 @@ function init() {
   loadState();
   applyTheme();
   
-  // Vérifier l'activation AVANT d'afficher l'app
+// Vérifier au démarrage si l'essai est épuisé
   if (!isActivated()) {
-    // Si pas activé : afficher l'écran d'activation directement
-    document.getElementById('onboarding').classList.add('hidden');
-    document.getElementById('app').classList.remove('visible');
-    showActivationScreen();
-    return;
+    // Compter les entrées réelles depuis localStorage (state pas encore chargé depuis IndexedDB)
+    const savedRaw = localStorage.getItem('noki_v3');
+    let savedEntryCount = 0;
+    try { savedEntryCount = JSON.parse(savedRaw)?.entries?.length || 0; } catch(e) {}
+    if (savedEntryCount >= 3) {
+      // Bloquer immédiatement : afficher l'écran d'activation
+      document.getElementById('onboarding').classList.add('hidden');
+      document.getElementById('app').classList.remove('visible');
+      showActivationScreen();
+      return; // Stopper init() ici
+    }
   }
-  
-  // Si activé : lancer l'app normalement
+
+  // Si activé ou déjà configuré : lancer l'app normalement
   if (state.brand !== 'NokiMetrics' || state.entries.length) { 
     enterApp(); 
   }
+
+  // Initialiser l'UI d'essai APRÈS enterApp (panels visibles)
+  if (typeof updateTrialUI === 'function') updateTrialUI();
           // Restaurer les filtres sauvegardés
   if (state.filters) {
     document.getElementById('filterCampaign').value = state.filters.campaign || '';
@@ -3491,7 +4094,7 @@ function updateStockPerformance() {
     const best = sorted[0];
     html += `
       <div style="background:var(--green-bg);border:1px solid rgba(64,239,183,0.2);border-radius:12px;padding:14px 16px;margin-bottom:16px">
-        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">🏆 Produit le plus rentable</div>
+        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px"> Produit le plus rentable</div>
         <div style="font-weight:700;font-size:15px;color:var(--ink)">${best[0]}</div>
         <div style="font-size:12px;color:var(--muted);margin-top:4px">
           Profit: <span style="color:var(--green);font-weight:700">${fmt(best[1].totalProfit)}</span> • 
@@ -3522,10 +4125,10 @@ function updateStockPerformance() {
           <div style="height:100%;width:${pct}%;background:${barColor};border-radius:10px;transition:width .6s"></div>
         </div>
         <div style="display:flex;gap:16px;font-size:10px;color:var(--muted)">
-          <span>📦 ${perf.totalOrders} cmd</span>
-          <span>✅ ${perf.totalDelivered} livrés (${deliveryRate}%)</span>
-          <span>💰 CPA: ${fmt(cpa)}</span>
-          <span>📈 ${perf.count} saisies</span>
+          <span> ${perf.totalOrders} cmd</span>
+          <span> ${perf.totalDelivered} livrés (${deliveryRate}%)</span>
+          <span> CPA: ${fmt(cpa)}</span>
+          <span> ${perf.count} saisies</span>
         </div>
       </div>`;
   });
@@ -3568,7 +4171,7 @@ function closeStockDeleteModal() {
 
 function confirmStockHistoryDelete() {
   const pin = document.getElementById('stockDeletePinInput').value.trim();
-  const expectedPin = state.stockPIN || '1234';
+  const expectedPin = state.ceoPIN || '0000';
   
   if (pin !== expectedPin) {
     document.getElementById('stockDeleteError').textContent = '❌ Code PIN incorrect';
