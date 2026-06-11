@@ -300,9 +300,12 @@
                 <div class="field"><label>Date</label><input type="date" id="f_date" required></div>
                 <div class="field">
                   <label>Produit (optionnel)</label>
-                  <select id="f_stock_product" onchange="onStockProductSelect()" style="background:var(--surf-2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;font-size:13px;color:var(--ink);outline:none;width:100%">
-                    <option value="">— Saisie manuelle —</option>
-                  </select>
+                  <button type="button" id="f_stock_product_btn" onclick="openProductPickerModal()" style="background:var(--surf-2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;font-size:13px;color:var(--muted);outline:none;width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:border-color .2s">
+                    <span id="f_stock_product_label">— Saisie manuelle —</span>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <!-- champ caché pour conserver la valeur -->
+                  <input type="hidden" id="f_stock_product" value="">
                 </div>
                 <div class="field"><label>Campagne / Offre</label><input type="text" id="f_campaign" placeholder="Ex: Crème hydratante 200ml" required></div>
               </div>
@@ -1504,15 +1507,54 @@ document.getElementById('ob_enter').addEventListener('click', () => {
 // (supprimé pour éviter le conflit avec Live Server)
 function enterApp() {
   document.getElementById('onboarding').classList.add('hidden');
+  // Lancer l'app en arrière-plan dans tous les cas
   document.getElementById('app').classList.add('visible');
   applySettings();
   updateDashboard();
   runSim();
   updateAnalytics();
   applyTheme();
-      if (!state.ceoPIN) state.ceoPIN = '0000';
-  // Démarrer la bannière partenaire
+  if (!state.ceoPIN) state.ceoPIN = '0000';
   schedulePartnerBanner();
+  // Afficher la politique si pas encore acceptée
+  if (!localStorage.getItem('noki_policy_accepted')) {
+    const overlay = document.getElementById('policyOverlay');
+    overlay.style.display = 'flex';
+  }
+}
+
+function checkPolicyScroll() {
+  const box = document.getElementById('policyScrollBox');
+  const btn = document.getElementById('policyAcceptBtn');
+  const hint = document.getElementById('policyScrollHint');
+  // Débloque quand l'utilisateur est à 40px du bas
+  const nearBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
+  if (nearBottom) {
+    btn.disabled = false;
+    btn.style.background = 'var(--accent, #6c63ff)';
+    btn.style.color = '#fff';
+    btn.style.cursor = 'pointer';
+    hint.style.opacity = '0';
+  }
+}
+
+function acceptPolicy() {
+  localStorage.setItem('noki_policy_accepted', '1');
+  const overlay = document.getElementById('policyOverlay');
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity .4s';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    // Reprendre le flux normal d'enterApp
+    document.getElementById('app').classList.add('visible');
+    applySettings();
+    updateDashboard();
+    runSim();
+    updateAnalytics();
+    applyTheme();
+    if (!state.ceoPIN) state.ceoPIN = '0000';
+    schedulePartnerBanner();
+  }, 400);
 }
 function showPanel(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -2688,35 +2730,92 @@ function filterByCampaign(campaignName) {
 }
 // Remplir le dropdown des produits du stock
 function populateStockDropdown() {
-  const sel = document.getElementById('f_stock_product');
-  if (!sel) return;
-  const data = getStockData();
-  sel.innerHTML = '<option value="">— Saisie manuelle —</option>';
-  data.products.forEach(p => {
-    sel.innerHTML += `<option value="${p.id}">${p.name} (Achat: ${fmt(p.buy)} | Vente: ${fmt(p.sell)} | Stock: ${p.qty})</option>`;
-  });
+  // Sélection via modale — rien à faire ici
 }
 
 function onStockProductSelect() {
-  const sel = document.getElementById('f_stock_product');
-  if (!sel || !sel.value) {
+  // Conservé pour compatibilité
+}
+
+// ---- Modale de sélection de produit ----
+let _productPickerAll = [];
+
+function openProductPickerModal() {
+  const data = getStockData();
+  _productPickerAll = data.products.filter(p => p.qty > 0);
+  document.getElementById('productPickerSearch').value = '';
+  renderProductPickerList(_productPickerAll);
+  const overlay = document.getElementById('productPickerOverlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('productPickerSearch').focus(), 80);
+}
+
+function closeProductPickerModal() {
+  document.getElementById('productPickerOverlay').style.display = 'none';
+}
+
+function closeProductPickerOutside(e) {
+  if (e.target === document.getElementById('productPickerOverlay')) closeProductPickerModal();
+}
+
+function filterProductPicker() {
+  const q = document.getElementById('productPickerSearch').value.toLowerCase();
+  const filtered = _productPickerAll.filter(p => p.name.toLowerCase().includes(q));
+  renderProductPickerList(filtered);
+}
+
+function renderProductPickerList(products) {
+  const list = document.getElementById('productPickerList');
+  if (!products.length) {
+    list.innerHTML = `<div style="text-align:center;padding:28px 16px;color:var(--muted);font-size:13px">Aucun produit en stock</div>`;
+    return;
+  }
+  list.innerHTML = products.map(p => `
+    <button type="button" onclick="selectProductFromPicker(${p.id})"
+      style="width:100%;background:none;border:none;border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px;font-family:var(--font);transition:background .15s"
+      onmouseover="this.style.background='var(--surf-2)'" onmouseout="this.style.background='none'">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Achat : ${fmt(p.buy)} · Vente : ${fmt(p.sell)}</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:${p.qty < 5 ? 'var(--amber)' : 'var(--green)'};white-space:nowrap">${p.qty} unités</div>
+    </button>
+  `).join('');
+}
+
+function selectProductFromPicker(productId) {
+  const hiddenInput = document.getElementById('f_stock_product');
+  const label = document.getElementById('f_stock_product_label');
+  const btn = document.getElementById('f_stock_product_btn');
+
+  if (!productId) {
+    hiddenInput.value = '';
+    label.textContent = '— Saisie manuelle —';
+    label.style.color = 'var(--muted)';
+    btn.style.borderColor = 'var(--border)';
     document.getElementById('f_campaign').value = '';
     document.getElementById('f_buy').value = '';
-    document.getElementById('f_sell').value = '';
+    closeProductPickerModal();
     liveUpdate();
     return;
   }
+
   const data = getStockData();
-  const product = data.products.find(p => p.id === +sel.value);
+  const product = data.products.find(p => p.id === productId);
   if (!product) return;
-  
+
+  hiddenInput.value = productId;
+  label.textContent = product.name;
+  label.style.color = 'var(--ink)';
+  btn.style.borderColor = 'var(--accent, var(--blue))';
+
   document.getElementById('f_campaign').value = product.name;
   document.getElementById('f_buy').value = product.buy;
-  
   if (!document.getElementById('f_sell').value || document.getElementById('f_sell').value === '0') {
     document.getElementById('f_sell').value = product.sell;
   }
-  
+
+  closeProductPickerModal();
   liveUpdate();
   showToast('Produit sélectionné : ' + product.name);
 }
@@ -2784,45 +2883,43 @@ function liveUpdate() {
 document.getElementById('entryForm').addEventListener('submit', async e => {
   e.preventDefault();
 
-  // ========== 1. Références et validation de base ==========
   const submitBtn = document.querySelector('#entryForm .submit-btn');
   const dateISO = document.getElementById('f_date').value;
   const campaign = document.getElementById('f_campaign').value.trim();
 
+  // Validation de base
   if (!dateISO || !campaign) {
-    animateSubmitButton(submitBtn, false);
     showToast('❌ Veuillez remplir la date et la campagne');
     return;
   }
 
-  // ========== 2. Vérification du stock (AVANT toute sauvegarde) ==========
+  // Lecture de la quantité livrée (toujours)
+  const deliveredQty = +document.getElementById('f_delivered').value || 0;
+
+  // Vérification du stock (si produit sélectionné)
   const stockSel = document.getElementById('f_stock_product');
-  let deliveredQty = 0;
   let productId = null;
 
   if (stockSel && stockSel.value) {
     productId = +stockSel.value;
-    deliveredQty = +document.getElementById('f_delivered').value || 0;
     if (deliveredQty > 0) {
       const stockData = getStockData();
       const product = stockData.products.find(p => p.id === productId);
       if (product && product.qty < deliveredQty) {
         showToast(`❌ Stock insuffisant pour "${product.name}" (disponible: ${product.qty}, demandé: ${deliveredQty})`);
-        animateSubmitButton(submitBtn, false);
-        return; // ← On arrête ici, rien n’est sauvegardé
+        return;
       }
     }
   }
 
-  // ========== 3. Garde-fou essai gratuit (si non activé) ==========
+  // Garde-fou essai gratuit
   if (!isActivated()) {
     const currentEntryCount = state.entries.length;
     if (currentEntryCount >= TRIAL_LIMIT) {
-      animateSubmitButton(submitBtn, false);
       showTrialActivationOverlay(true);
       return;
     }
-    // Mise à jour visuelle de la barre d’essai
+    // Mise à jour visuelle de la barre d'essai (optionnel)
     const nextCount = Math.min(currentEntryCount + 1, TRIAL_LIMIT);
     const nextPct = Math.round((nextCount / TRIAL_LIMIT) * 100);
     const fill = document.getElementById('trialFill');
@@ -2833,64 +2930,78 @@ document.getElementById('entryForm').addEventListener('submit', async e => {
     if (countSpan) countSpan.textContent = nextCount + ' / ' + TRIAL_LIMIT;
   }
 
-  // ========== 4. Chargement visuel du bouton ==========
+  // Animation de chargement (mais sans bloquer indéfiniment)
   submitBtn.classList.add('loading');
   submitBtn.disabled = true;
   await new Promise(resolve => setTimeout(resolve, 400));
 
-  // ========== 5. Construction et sauvegarde de la campagne ==========
-  const entry = {
-    id: Date.now(),
-    dateISO,
-    campaign,
-    spend: +document.getElementById('f_spend').value || 0,
-    spendCurrency: document.getElementById('f_spend_currency')?.value || 'main',
-    orders: +document.getElementById('f_orders').value || 0,
-    delivered: deliveredQty,
-    confirmed: +document.getElementById('f_orders').value || 0,
-    buy: +document.getElementById('f_buy').value || 0,
-    buyCurrency: document.getElementById('f_buy_currency')?.value || 'main',
-    sell: +document.getElementById('f_sell').value || 0,
-    sellCurrency: document.getElementById('f_sell_currency')?.value || 'main',
-    ship: +document.getElementById('f_ship').value || 0,
-    shipCurrency: document.getElementById('f_ship_currency')?.value || 'main',
-    call: +document.getElementById('f_call').value || 0,
-    callCurrency: document.getElementById('f_call_currency')?.value || 'main',
-    returns: +document.getElementById('f_returns').value || 0,
-    other: +document.getElementById('f_other').value || 0,
-    otherCurrency: document.getElementById('f_other_currency')?.value || 'main'
-  };
+  try {
+    // Construction de l'entrée
+    const entry = {
+      id: Date.now(),
+      dateISO,
+      campaign,
+      spend: +document.getElementById('f_spend').value || 0,
+      spendCurrency: document.getElementById('f_spend_currency')?.value || 'main',
+      orders: +document.getElementById('f_orders').value || 0,
+      delivered: deliveredQty,
+      confirmed: +document.getElementById('f_orders').value || 0,
+      buy: +document.getElementById('f_buy').value || 0,
+      buyCurrency: document.getElementById('f_buy_currency')?.value || 'main',
+      sell: +document.getElementById('f_sell').value || 0,
+      sellCurrency: document.getElementById('f_sell_currency')?.value || 'main',
+      ship: +document.getElementById('f_ship').value || 0,
+      shipCurrency: document.getElementById('f_ship_currency')?.value || 'main',
+      call: +document.getElementById('f_call').value || 0,
+      callCurrency: document.getElementById('f_call_currency')?.value || 'main',
+      returns: +document.getElementById('f_returns').value || 0,
+      other: +document.getElementById('f_other').value || 0,
+      otherCurrency: document.getElementById('f_other_currency')?.value || 'main'
+    };
 
-  state.entries.push(entry);
-  await saveState();
+    state.entries.push(entry);
+    await saveState();
 
-  // ========== 6. Mise à jour du stock (si produit sélectionné) ==========
-  if (stockSel && stockSel.value) {
-    const returnsQty = +document.getElementById('f_returns').value || 0;
-    if (deliveredQty > 0) {
-      stockMove(productId, 'out', deliveredQty, 'Vente via saisie campagne');
+    // Mise à jour du stock (si produit sélectionné)
+    if (stockSel && stockSel.value) {
+      const returnsQty = +document.getElementById('f_returns').value || 0;
+      if (deliveredQty > 0) {
+        stockMove(productId, 'out', deliveredQty, 'Vente via saisie campagne');
+      }
+      if (returnsQty > 0) {
+        stockMove(productId, 'in', returnsQty, 'Retour/RMA via saisie campagne');
+      }
     }
-    if (returnsQty > 0) {
-      stockMove(productId, 'in', returnsQty, 'Retour/RMA via saisie campagne');
-    }
+
+    // Rafraîchissement des affichages
+    updateDashboard();
+    updateAnalytics();
+    document.getElementById('entryForm').reset();
+    document.getElementById('f_date').valueAsDate = new Date();
+    document.getElementById('f_stock_product').value = '';
+    const _lbl = document.getElementById('f_stock_product_label');
+    if (_lbl) { _lbl.textContent = '— Saisie manuelle —'; _lbl.style.color = 'var(--muted)'; }
+    const _btn = document.getElementById('f_stock_product_btn');
+    if (_btn) _btn.style.borderColor = 'var(--border)';
+    document.getElementById('livePreview').style.display = 'none';
+    showPanel('dashboard');
+    showToast('✅ Saisie enregistrée avec succès');
+
+    setTimeout(() => {
+      checkCPAAnomaly();
+      checkStockAlerts();
+    }, 2000);
+  } catch (err) {
+    console.error('Erreur lors de la sauvegarde :', err);
+    showToast('❌ Une erreur est survenue, veuillez réessayer');
+  } finally {
+    // Réactivation immédiate du bouton (supprime l'attente de 1,3s)
+    submitBtn.classList.remove('loading');
+    submitBtn.disabled = false;
+    // Optionnel : petite animation de succès visuel sans bloquer
+    submitBtn.classList.add('success');
+    setTimeout(() => submitBtn.classList.remove('success'), 500);
   }
-
-  // ========== 7. Rafraîchissement final ==========
-  updateDashboard();
-  updateAnalytics();
-  document.getElementById('entryForm').reset();
-  document.getElementById('f_date').valueAsDate = new Date();
-  document.getElementById('f_stock_product').value = '';
-  document.getElementById('livePreview').style.display = 'none';
-  showPanel('dashboard');
-
-  animateSubmitButton(submitBtn, true);
-  showToast('✅ Saisie enregistrée avec succès');
-
-  setTimeout(() => {
-    checkCPAAnomaly();
-    checkStockAlerts();
-  }, 2000);
 });
 
 window.deleteEntry = id => { state.entries = state.entries.filter(e => e.id !== id); saveState(); updateDashboard(); updateAnalytics(); showToast('Saisie supprimée'); };
@@ -4306,5 +4417,75 @@ init();
     });
   }
 </script>
+<!-- ===================== PRODUCT PICKER MODAL ===================== -->
+<div id="productPickerOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center" onclick="closeProductPickerOutside(event)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;width:min(420px,92vw);max-height:520px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.4)">
+    <!-- header -->
+    <div style="padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0">
+      <div style="font-size:15px;font-weight:700;color:var(--ink)">Choisir un produit</div>
+      <button onclick="closeProductPickerModal()" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:8px;line-height:0">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <!-- search -->
+    <div style="padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surf-2);border:1px solid var(--border);border-radius:10px;padding:8px 12px">
+        <svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="productPickerSearch" type="text" placeholder="Rechercher un produit…" oninput="filterProductPicker()" style="background:none;border:none;outline:none;font-size:13px;color:var(--ink);width:100%;font-family:var(--font)">
+      </div>
+    </div>
+    <!-- list -->
+    <div id="productPickerList" style="overflow-y:auto;flex:1;padding:8px 8px"></div>
+    <!-- saisie manuelle -->
+    <div style="padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0">
+      <button type="button" onclick="selectProductFromPicker(null)" style="width:100%;background:none;border:1px dashed var(--border);border-radius:10px;padding:10px;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--font);transition:background .15s" onmouseover="this.style.background='var(--surf-2)'" onmouseout="this.style.background='none'">
+        ✏️ Saisie manuelle
+      </button>
+    </div>
+  </div>
+</div>
+<!-- ===================== POLITIQUE D'UTILISATION ===================== -->
+<div id="policyOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;width:min(480px,94vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5)">
+    <!-- Header -->
+    <div style="padding:20px 22px 14px;border-bottom:1px solid var(--border);flex-shrink:0;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">🔐</div>
+      <div style="font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.3px">Politique d'utilisation & Confidentialité</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Veuillez lire attentivement avant de continuer</div>
+    </div>
+    <!-- Contenu scrollable -->
+    <div id="policyScrollBox" onscroll="checkPolicyScroll()" style="overflow-y:auto;flex:1;padding:20px 22px;font-size:13px;line-height:1.7;color:var(--ink)">
+
+      <p style="margin:0 0 14px"><strong>Dernière mise à jour :</strong> Juin 2025</p>
+
+      <h3 style="font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px">1. Objet</h3>
+      <p style="margin:0 0 14px;color:var(--muted)">NokiMetrics est un outil de gestion de performance publicitaire et commerciale destiné à un usage professionnel individuel. L'accès est conditionné à l'obtention d'une licence valide délivrée par l'éditeur.</p>
+
+      <h3 style="font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px">2. Licence & Usage</h3>
+      <p style="margin:0 0 14px;color:var(--muted)">La licence accordée est strictement personnelle, non cessible et non transférable. Toute tentative de contournement du système d'activation, de duplication ou de redistribution de l'application est formellement interdite et pourra entraîner la révocation immédiate de la licence sans remboursement.</p>
+
+      <h3 style="font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px">3. Données & Confidentialité</h3>
+      <p style="margin:0 0 14px;color:var(--muted)">Toutes les données saisies dans NokiMetrics (campagnes, ventes, stocks, dépenses) sont stockées localement sur votre appareil via le navigateur (localStorage). Aucune donnée n'est transmise à des serveurs tiers. L'éditeur n'a aucun accès à vos données commerciales.</p>
+
+      <h3 style="font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px">4. Responsabilité</h3>
+      <p style="margin:0 0 14px;color:var(--muted)">NokiMetrics est fourni "tel quel". L'éditeur ne saurait être tenu responsable de décisions commerciales prises sur la base des données affichées. L'utilisateur reste seul responsable de l'interprétation et de l'utilisation des indicateurs de performance.</p>
+
+      <h3 style="font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px">5. Modifications</h3>
+      <p style="margin:0 0 14px;color:var(--muted)">L'éditeur se réserve le droit de modifier les présentes conditions à tout moment. En cas de mise à jour majeure, l'utilisateur en sera informé lors de sa prochaine connexion.</p>
+
+      <h3 style="font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px">6. Contact</h3>
+      <p style="margin:0 0 6px;color:var(--muted)">Pour toute question relative à votre licence ou à la confidentialité de vos données, contactez l'éditeur via WhatsApp au numéro communiqué lors de votre activation.</p>
+      <!-- Ancre de fin pour détecter le bas du scroll -->
+      <div id="policyBottom" style="height:1px;margin-top:8px"></div>
+    </div>
+    <!-- Footer avec bouton -->
+    <div style="padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0;text-align:center">
+      <div id="policyScrollHint" style="font-size:11px;color:var(--muted);margin-bottom:10px;transition:opacity .3s">↓ Faites défiler jusqu'en bas pour continuer</div>
+      <button id="policyAcceptBtn" onclick="acceptPolicy()" disabled style="width:100%;padding:13px;border-radius:12px;border:none;font-size:14px;font-weight:700;font-family:var(--font);cursor:not-allowed;background:var(--surf-2);color:var(--muted);transition:all .3s">
+        Accepter et continuer
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
