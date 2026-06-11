@@ -463,15 +463,54 @@ document.getElementById('ob_enter').addEventListener('click', () => {
 // (supprimé pour éviter le conflit avec Live Server)
 function enterApp() {
   document.getElementById('onboarding').classList.add('hidden');
+  // Lancer l'app en arrière-plan dans tous les cas
   document.getElementById('app').classList.add('visible');
   applySettings();
   updateDashboard();
   runSim();
   updateAnalytics();
   applyTheme();
-      if (!state.ceoPIN) state.ceoPIN = '0000';
-  // Démarrer la bannière partenaire
+  if (!state.ceoPIN) state.ceoPIN = '0000';
   schedulePartnerBanner();
+  // Afficher la politique si pas encore acceptée
+  if (!localStorage.getItem('noki_policy_accepted')) {
+    const overlay = document.getElementById('policyOverlay');
+    overlay.style.display = 'flex';
+  }
+}
+
+function checkPolicyScroll() {
+  const box = document.getElementById('policyScrollBox');
+  const btn = document.getElementById('policyAcceptBtn');
+  const hint = document.getElementById('policyScrollHint');
+  // Débloque quand l'utilisateur est à 40px du bas
+  const nearBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
+  if (nearBottom) {
+    btn.disabled = false;
+    btn.style.background = 'var(--accent, #6c63ff)';
+    btn.style.color = '#fff';
+    btn.style.cursor = 'pointer';
+    hint.style.opacity = '0';
+  }
+}
+
+function acceptPolicy() {
+  localStorage.setItem('noki_policy_accepted', '1');
+  const overlay = document.getElementById('policyOverlay');
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity .4s';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    // Reprendre le flux normal d'enterApp
+    document.getElementById('app').classList.add('visible');
+    applySettings();
+    updateDashboard();
+    runSim();
+    updateAnalytics();
+    applyTheme();
+    if (!state.ceoPIN) state.ceoPIN = '0000';
+    schedulePartnerBanner();
+  }, 400);
 }
 function showPanel(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -1590,15 +1629,93 @@ function filterByCampaign(campaignName) {
   applyFilters();
   showToast(`Filtré : "${campaignName}"`);
 }
-// Remplir le dropdown des produits du stock
+// Remplir le dropdown des produits du stock (conservé pour compatibilité, ne fait rien de visible)
 function populateStockDropdown() {
-  const sel = document.getElementById('f_stock_product');
-  if (!sel) return;
+  // La sélection se fait désormais via la modale openProductPickerModal()
+}
+
+// ---- Modale de sélection de produit ----
+let _productPickerAll = [];
+
+function openProductPickerModal() {
   const data = getStockData();
-  sel.innerHTML = '<option value="">— Saisie manuelle —</option>';
-  data.products.forEach(p => {
-    sel.innerHTML += `<option value="${p.id}">${p.name} (Achat: ${fmt(p.buy)} | Vente: ${fmt(p.sell)} | Stock: ${p.qty})</option>`;
-  });
+  // Uniquement les produits avec stock > 0
+  _productPickerAll = data.products.filter(p => p.qty > 0);
+  document.getElementById('productPickerSearch').value = '';
+  renderProductPickerList(_productPickerAll);
+  const overlay = document.getElementById('productPickerOverlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('productPickerSearch').focus(), 80);
+}
+
+function closeProductPickerModal() {
+  document.getElementById('productPickerOverlay').style.display = 'none';
+}
+
+function closeProductPickerOutside(e) {
+  if (e.target === document.getElementById('productPickerOverlay')) closeProductPickerModal();
+}
+
+function filterProductPicker() {
+  const q = document.getElementById('productPickerSearch').value.toLowerCase();
+  const filtered = _productPickerAll.filter(p => p.name.toLowerCase().includes(q));
+  renderProductPickerList(filtered);
+}
+
+function renderProductPickerList(products) {
+  const list = document.getElementById('productPickerList');
+  if (!products.length) {
+    list.innerHTML = `<div style="text-align:center;padding:28px 16px;color:var(--muted);font-size:13px">Aucun produit en stock</div>`;
+    return;
+  }
+  list.innerHTML = products.map(p => `
+    <button type="button" onclick="selectProductFromPicker(${p.id})"
+      style="width:100%;background:none;border:none;border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px;font-family:var(--font);transition:background .15s"
+      onmouseover="this.style.background='var(--surf-2)'" onmouseout="this.style.background='none'">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Achat : ${fmt(p.buy)} · Vente : ${fmt(p.sell)}</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:${p.qty < 5 ? 'var(--amber)' : 'var(--green)'};white-space:nowrap">${p.qty} unités</div>
+    </button>
+  `).join('');
+}
+
+function selectProductFromPicker(productId) {
+  const hiddenInput = document.getElementById('f_stock_product');
+  const label = document.getElementById('f_stock_product_label');
+  const btn = document.getElementById('f_stock_product_btn');
+
+  if (!productId) {
+    hiddenInput.value = '';
+    label.textContent = '— Saisie manuelle —';
+    label.style.color = 'var(--muted)';
+    btn.style.borderColor = 'var(--border)';
+    document.getElementById('f_campaign').value = '';
+    document.getElementById('f_buy').value = '';
+    closeProductPickerModal();
+    liveUpdate();
+    return;
+  }
+
+  const data = getStockData();
+  const product = data.products.find(p => p.id === productId);
+  if (!product) return;
+
+  hiddenInput.value = productId;
+  label.textContent = product.name;
+  label.style.color = 'var(--ink)';
+  btn.style.borderColor = 'var(--accent, var(--blue))';
+
+  document.getElementById('f_campaign').value = product.name;
+  document.getElementById('f_buy').value = product.buy;
+  if (!document.getElementById('f_sell').value || document.getElementById('f_sell').value === '0') {
+    document.getElementById('f_sell').value = product.sell;
+  }
+
+  closeProductPickerModal();
+  liveUpdate();
+  showToast('Produit sélectionné : ' + product.name);
 }
 
 function onStockProductSelect() {
@@ -1745,6 +1862,14 @@ document.getElementById('entryForm').addEventListener('submit', e => {
   document.getElementById('entryForm').reset();
   document.getElementById('f_date').valueAsDate = new Date();
   document.getElementById('f_stock_product').value = '';
+  const _lbl = document.getElementById('f_stock_product_label');
+  if (_lbl) { _lbl.textContent = '— Saisie manuelle —'; _lbl.style.color = 'var(--muted)'; }
+  const _btn = document.getElementById('f_stock_product_btn');
+  if (_btn) _btn.style.borderColor = 'var(--border)';
+  const _lbl = document.getElementById('f_stock_product_label');
+  if (_lbl) { _lbl.textContent = '— Saisie manuelle —'; _lbl.style.color = 'var(--muted)'; }
+  const _btn = document.getElementById('f_stock_product_btn');
+  if (_btn) _btn.style.borderColor = 'var(--border)';
   document.getElementById('livePreview').style.display = 'none';
   showPanel('dashboard');
   showToast('Saisie enregistrée avec succès'); 
